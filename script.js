@@ -11,7 +11,6 @@ let targetFolderIdForImport = null;
 let currentFontScale = 1;
 
 /*WEBホスト対応*/
-let appData = { folders: [] };
 let authToken = localStorage.getItem('quizAuthToken');
 
 let syncFileHandle = null; 
