@@ -189,7 +189,7 @@
             <p style="margin-bottom: 15px;">利用するにはログインしてください</p>
             <form id="login-form" onsubmit="handleLogin(event)">
                 <input type="text" id="login-username" placeholder="ユーザー名" required style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-main);">
-                <input type="password" id="login-password" placeholder="パスワード" required style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-main);">
+                <input type="password" id="login-password" placeholder="パスワード" required autocomplete="current-password" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-main);">
                 <button type="submit" class="btn primary-btn" style="width: 100%;">ログイン</button>
             </form>
         </div>
