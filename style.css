@@ -52,7 +52,7 @@ body { background-color: var(--bg-color); color: var(--text-main); display: flex
 
 /* --- メインコンテンツ --- */
 .main-content { flex-grow: 1; padding: 20px 40px; overflow-y: auto; position: relative; }
-.mobile-menu-btn { display: none; background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 6px; cursor: pointer; margin-bottom: 15px; font-weight: bold; }
+.mobile-menu-btn { display: none; background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 6px; cursor: pointer; margin-bottom: 15px; [...]
 .screen { display: none; animation: fadeIn 0.3s ease; max-width: 800px; margin: 0 auto; }
 .screen.active { display: block; }
 #question-text, #explanation-text { white-space: pre-wrap; }
@@ -62,7 +62,7 @@ body { background-color: var(--bg-color); color: var(--text-main); display: flex
 .progress-indicator { color: var(--text-muted); font-weight: bold; }
 .question-card { background: var(--card-bg); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); font-size: 1.1rem; line-height: 1.6; margin-bottom: 25px; }
 .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-.choice-btn { background: var(--card-bg); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; font-size: 1rem; color: var(--text-main); cursor: pointer; text-align: left; transition: 0.2s; white-space: pre-wrap; }
+.choice-btn { background: var(--card-bg); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; font-size: 1rem; color: var(--text-main); cursor: pointer; text-align: left; transit[...]
 .choice-btn:hover:not(:disabled) { border-color: var(--primary-color); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(108, 92, 231, 0.15); }
 .choice-btn.correct { background-color: rgba(0, 184, 148, 0.1); border-color: #00B894; color: #00B894; font-weight: bold; }
 .choice-btn.incorrect { background-color: rgba(214, 48, 49, 0.1); border-color: #D63031; color: #D63031; }
@@ -103,7 +103,7 @@ body { background-color: var(--bg-color); color: var(--text-main); display: flex
 .outline-btn { background-color: transparent; border: 1px solid var(--text-muted); color: var(--text-main); }
 body.dark-mode .secondary-btn { background-color: #444; color: #FFF; }
 body.dark-mode .secondary-btn:hover { background-color: #555; }
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 100; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 100; }
 .modal-overlay.hidden { display: none; }
 .modal-content { background: var(--card-bg); padding: 30px; border-radius: 12px; width: 400px; text-align: center; }
 .modal-content h3 { margin-bottom: 10px; }
@@ -117,6 +117,11 @@ body.dark-mode .secondary-btn:hover { background-color: #555; }
 .choice-btn.review-choice:hover { transform: none; box-shadow: none; border-color: var(--border-color); }
 .choice-btn.review-choice.correct:hover { border-color: #00B894; }
 .choice-btn.review-choice.incorrect:hover { border-color: #D63031; }
+
+/* --- ログイン画面は背景を一色にする --- */
+#login-modal {
+    background: var(--bg-color) !important;
+}
 
 /* === スマホ（レスポンシブ）最適化（よりコンパクトに） === */
 @media (max-width: 768px) {
