@@ -369,3 +369,29 @@ body.dark-mode .weak-btn {
     -webkit-user-select: none;
     -webkit-touch-callout: none;
 }
+/* 月表示エリアの親要素（絶対配置の基準点にする） */
+#heatmap-x-axis {
+    position: relative;
+    height: 20px;
+    width: 100%;
+    margin-bottom: 6px;
+    font-size: 0.75rem;
+    color: #666;
+}
+
+/* 月のラベルテキスト */
+.month-label {
+    position: absolute;
+    top: 0;
+    white-space: nowrap;
+    transform: translateX(0);
+}
+
+/* マス目のホバー時カーソル設定 */
+.day-square {
+    cursor: pointer;
+    /* 必要に応じて既存のマス目サイズに合わせて調整 */
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
