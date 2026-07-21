@@ -72,6 +72,20 @@ function parseSafeDate(dateStr) {
     return new Date();
 }
 
+function logout(){
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            if (confirm('ログアウトしますか？')) {
+                localStorage.removeItem('quizAuthToken');
+                authToken = null;
+                appData = { folders: [] };
+                location.reload();
+            }
+        });
+    }
+}
+
 // 初期化フロー
 async function initApp() {
     try {
@@ -95,6 +109,7 @@ async function initApp() {
     initFontSize();
     initSidebarToggle(); 
     renderHeatmap();
+    logout()
 }
 
 initApp();
