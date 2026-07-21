@@ -51,11 +51,21 @@
             <button id="mobile-menu-btn" class="mobile-menu-btn">☰ メニュー</button>
 
             <div id="welcome-screen" class="screen active">
-                <div class="welcome-box">
-                    <h1>問題演習へようこそ</h1>
-                    <p>左のメニューからフォルダを作成し、JSON問題をロードしてください。<br>
-                    ※左下の「ローカルファイルと同期」から既存のデータを読み込むことも可能です。</p>
-                </div>
+<div class="welcome-box">
+    <h1>問題演習へようこそ</h1>
+    <!-- 追加：連続学習ストリークバッジ -->
+    <div id="streak-display" class="streak-badge hidden">
+        🔥 連続学習: <span id="streak-count">0</span>日
+    </div>
+    
+    <p>左のメニューからフォルダを作成し、JSON問題をロードしてください。<br>
+    ※左下の「ローカルファイルと同期」から既存のデータを読み込むことも可能です。</p>
+    
+    <!-- 追加：苦手な問題のみの再テストボタン -->
+    <button id="weak-retest-btn" class="btn outline-btn weak-btn hidden">
+        ⚠️ 苦手な問題（正答率50%未満）を復習する
+    </button>
+</div>
                 <div class="heatmap-section">
                     <div class="heatmap-header">
                         <h2>📊 学習ヒートマップ</h2>
@@ -97,13 +107,18 @@
             </div>
 
             <div id="quiz-screen" class="screen">
-                <header class="quiz-header">
-                    <h2 id="quiz-title">問題セット名</h2>
-                    <div class="progress-indicator">
-                        <span id="timer-display">⏱ 00:00</span> | 
-                        問題 <span id="current-q-num">1</span> / <span id="total-q-num">5</span>
-                    </div>
-                </header>
+<header class="quiz-header">
+    <h2 id="quiz-title">問題セット名</h2>
+    <div class="progress-indicator">
+        <span id="timer-display">⏱ 00:00</span> | 
+        問題 <span id="current-q-num">1</span> / <span id="total-q-num">5</span>
+    </div>
+</header>
+                <div class="progress-bar-bg">
+    <div id="progress-bar" class="progress-bar-fill"></div>
+</div>
+
+<div class="question-card">...</div>
 
                 <div class="question-card">
                     <p id="question-text">ここに問題文が表示されます。</p>
