@@ -579,6 +579,12 @@ function saveCurrentProgress() {
     }
 }
 
+function updateProgressBar(currentIndex, totalQuestions) {
+    // 例：currentIndexが0始まりの場合 (0 + 1) / 5 * 100
+    const percent = ((currentIndex + 1) / totalQuestions) * 100;
+    document.getElementById('progress-bar').style.width = percent + '%';
+}
+
 function renderQuestion() {
     if (!currentQuestions || currentQuestions.length === 0) return;
     const q = currentQuestions[currentIndex];
@@ -660,7 +666,7 @@ function renderQuestion() {
             submitBtn.style.display = 'none';
         }
     };
-
+updateProgressBar();
     document.getElementById('feedback-area').classList.add('hidden');
     document.getElementById('next-btn').style.display = 'none';
 }
