@@ -1,6 +1,6 @@
 /* 状態管理 */
 let appData = { folders: [] };
-let authToken = localStorage.getItem('quizAuthToken'); // ★追加: トークンを記憶する変数
+let authToken = localStorage.getItem('quizAuthToken'); 
 let currentFolderId = null;
 let currentSetId = null;
 let currentQuestions = [];
@@ -60,12 +60,11 @@ async function verifyPermission(fileHandle, readWrite) {
     return false;
 }
 
-/* ★追加：日付パースの安全装置（Safari等でのエラー回避） */
+/* 日付パースの安全装置（Safari等でのエラー回避） */
 function parseSafeDate(dateStr) {
     if (!dateStr) return new Date();
     let d = new Date(dateStr);
     if (!isNaN(d)) return d;
-    // YYYY/MM/DD 形式をハイフンに変換して再パース
     const fixedStr = dateStr.replace(/\//g, '-').replace(' ', 'T');
     d = new Date(fixedStr);
     if (!isNaN(d)) return d;
@@ -109,14 +108,14 @@ async function initApp() {
     initFontSize();
     initSidebarToggle(); 
     renderHeatmap();
-    logout()
+    logout();
+    initWeakRetestBtn();
 }
 
 initApp();
 
 // --- データ管理 (Cloudflare KV & API) ---
 async function loadAppData() {
-    // トークンがなければログインモーダルを表示して終了
     if (!authToken) {
         const loginModal = document.getElementById('login-modal');
         if (loginModal) loginModal.style.display = 'flex';
@@ -129,7 +128,6 @@ async function loadAppData() {
         });
 
         if (res.status === 401) {
-            // 本当に認証が無効な場合のみログインを促す
             localStorage.removeItem('quizAuthToken');
             authToken = null;
             const loginModal = document.getElementById('login-modal');
@@ -165,7 +163,7 @@ function cleanupOldHistory() {
         f.sets.forEach(s => {
             if(s.history) {
                 s.history.forEach(h => {
-                    const d = parseSafeDate(h.date); // ★修正：安全にパース
+                    const d = parseSafeDate(h.date);
                     if (!isNaN(d) && d < thresholdDate && h.userAnswers) {
                         delete h.userAnswers; 
                         isCleaned = true;
@@ -180,7 +178,6 @@ function cleanupOldHistory() {
 async function saveAppData() {
     renderSidebar();
     
-    // クラウド（KV）へ保存
     if (authToken) {
         try {
             await fetch('/api/data', {
@@ -196,7 +193,6 @@ async function saveAppData() {
         }
     }
     
-    // 既存のローカルファイル同期（File System API）の処理があれば維持
     if (syncFileHandle) {
         try {
             const hasPermission = await verifyPermission(syncFileHandle, true);
@@ -210,6 +206,7 @@ async function saveAppData() {
         }
     }
 }
+
 // フォルダ設定・同期再開ボタンの処理
 const syncBtn = document.getElementById('sync-file-btn');
 if (syncBtn) {
@@ -462,7 +459,7 @@ function initQuizSequence(folderId, setId) {
     const set = folder.sets.find(s => s.id === setId);
 
     if (set.inProgress) {
-        document.getElementById('resume-modal').classList.remove('hidden');
+        document.getElementById('resume-modal')?.classList.remove('hidden');
     } else {
         startFreshQuiz(set.questions);
     }
@@ -478,7 +475,7 @@ function shuffleArray(array) {
 }
 
 function startFreshQuiz(questionsData) {
-    const set = appData.folders.find(f => f.id === currentFolderId).sets.find(s => s.id === currentSetId);
+    const set = currentFolderId ? appData.folders.find(f => f.id === currentFolderId)?.sets.find(s => s.id === currentSetId) : null;
     
     const chk = document.getElementById('shuffle-mode-chk');
     const isShuffle = chk ? chk.checked : false;
@@ -488,12 +485,13 @@ function startFreshQuiz(questionsData) {
     userAnswers = [];
     elapsedTime = 0;
     
-    if (questionsData.length === set.questions.length) {
+    if (set && questionsData.length === set.questions.length) {
         set.inProgress = { currentIndex, userAnswers, elapsedTime, currentQuestions }; 
         saveAppData();
     }
     
-    document.getElementById('quiz-title').textContent = set.name + (isShuffle ? " (🔀シャッフル)" : "");
+    const titleText = set ? set.name : "⚠️ 苦手問題リスト";
+    document.getElementById('quiz-title').textContent = titleText + (isShuffle ? " (🔀シャッフル)" : "");
     startTimer();
     switchScreen('quiz-screen');
     renderQuestion();
@@ -520,23 +518,23 @@ if(retestBtn) {
     };
 }
 
-document.getElementById('resume-btn').onclick = () => {
-    document.getElementById('resume-modal').classList.add('hidden');
+document.getElementById('resume-btn')?.addEventListener('click', () => {
+    document.getElementById('resume-modal')?.classList.add('hidden');
     resumeQuiz();
-};
+});
 
-document.getElementById('restart-btn').onclick = () => {
-    document.getElementById('resume-modal').classList.add('hidden');
+document.getElementById('restart-btn')?.addEventListener('click', () => {
+    document.getElementById('resume-modal')?.classList.add('hidden');
     const set = appData.folders.find(f => f.id === currentFolderId).sets.find(s => s.id === currentSetId);
     startFreshQuiz(set.questions);
-};
+});
 
-document.getElementById('cancel-modal-btn').onclick = () => {
-    document.getElementById('resume-modal').classList.add('hidden');
+document.getElementById('cancel-modal-btn')?.addEventListener('click', () => {
+    document.getElementById('resume-modal')?.classList.add('hidden');
     cleanupAndSaveCurrent(); 
     renderHeatmap();
     switchScreen('welcome-screen');
-};
+});
 
 function resumeQuiz() {
     const set = appData.folders.find(f => f.id === currentFolderId).sets.find(s => s.id === currentSetId);
@@ -580,9 +578,34 @@ function saveCurrentProgress() {
 }
 
 function updateProgressBar(currentIndex, totalQuestions) {
-    // 例：currentIndexが0始まりの場合 (0 + 1) / 5 * 100
+    const bar = document.getElementById('progress-bar');
+    if (!bar || !totalQuestions) return;
     const percent = ((currentIndex + 1) / totalQuestions) * 100;
-    document.getElementById('progress-bar').style.width = percent + '%';
+    bar.style.width = percent + '%';
+}
+
+function attachEliminationGestures(button) {
+    button.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (!button.classList.contains('selected')) {
+            button.classList.toggle('eliminated');
+        }
+    });
+
+    let pressTimer;
+    button.addEventListener('touchstart', (e) => {
+        pressTimer = setTimeout(() => {
+            if (!button.classList.contains('selected')) {
+                button.classList.toggle('eliminated');
+                if (navigator.vibrate) navigator.vibrate(50);
+            }
+        }, 500);
+    }, { passive: true });
+
+    const cancelPress = () => clearTimeout(pressTimer);
+    button.addEventListener('touchend', cancelPress);
+    button.addEventListener('touchcancel', cancelPress);
+    button.addEventListener('touchmove', cancelPress); 
 }
 
 function renderQuestion() {
@@ -625,19 +648,8 @@ function renderQuestion() {
         btn.textContent = `${index + 1}. ${choiceText}`;
         btn.dataset.index = index + 1; 
         
-        let pressTimer;
-        const toggleEliminate = (e) => {
-            e.preventDefault(); 
-            if (btn.classList.contains('selected')) return; 
-            btn.classList.toggle('eliminated');
-        };
-
-        btn.addEventListener('contextmenu', toggleEliminate);
-        btn.addEventListener('touchstart', (e) => {
-            pressTimer = setTimeout(() => { toggleEliminate(e); }, 500);
-        }, { passive: false });
-        btn.addEventListener('touchend', () => clearTimeout(pressTimer));
-        btn.addEventListener('touchmove', () => clearTimeout(pressTimer));
+        // 消去線ジェスチャーをバインド
+        attachEliminationGestures(btn);
 
         btn.onclick = () => {
             if (btn.classList.contains('eliminated')) return;
@@ -666,7 +678,8 @@ function renderQuestion() {
             submitBtn.style.display = 'none';
         }
     };
-updateProgressBar();
+
+    updateProgressBar(currentIndex, currentQuestions.length);
     document.getElementById('feedback-area').classList.add('hidden');
     document.getElementById('next-btn').style.display = 'none';
 }
@@ -733,32 +746,33 @@ function finishQuiz() {
         clearInterval(timerInterval);
         timerInterval = null;
     }
-    const set = appData.folders.find(f => f.id === currentFolderId).sets.find(s => s.id === currentSetId);
     
+    const set = currentSetId ? appData.folders.find(f => f.id === currentFolderId)?.sets.find(s => s.id === currentSetId) : null;
     const correctCount = userAnswers.filter(a => a && a.isCorrect).length;
     const total = currentQuestions.length;
     
-    const isFullTest = (total === set.questions.length);
+    const isFullTest = set ? (total === set.questions.length) : false;
 
-    // ★修正：再テストも含め、すべての完了を履歴（ヒートマップ用）に保存する
     const historyRecord = {
         date: new Date().toLocaleString('ja-JP'),
         elapsedTime: elapsedTime,
         correctCount: correctCount,
         total: total,
-        isFullTest: isFullTest, // 再テストかどうかの判別用フラグ
+        isFullTest: isFullTest,
         userAnswers: [...userAnswers] 
     };
-    set.history.push(historyRecord);
-    set.inProgress = null;
+
+    if (set) {
+        set.history.push(historyRecord);
+        set.inProgress = null;
+    }
     
     cleanupOldHistory(); 
     saveAppData();
 
-    document.getElementById('result-set-title').textContent = set.name;
+    document.getElementById('result-set-title').textContent = set ? set.name : "⚠️ 苦手問題テスト";
 
-    // 何回目のフルテストか（または再テストか）を表示
-    const fullTestCount = set.history.filter(h => h.isFullTest !== false).length;
+    const fullTestCount = set ? set.history.filter(h => h.isFullTest !== false).length : 1;
     document.getElementById('attempt-count').textContent = isFullTest ? `${fullTestCount}回目の試み` : `⚠️ 再テストの記録`;
     
     const h = Math.floor(elapsedTime / 3600);
@@ -874,7 +888,7 @@ function renderReview(filterMode) {
 
 function switchScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(screenId).classList.add('active');
+    document.getElementById(screenId)?.classList.add('active');
 }
 
 /* --- UIトグル・表示制御系 --- */
@@ -965,7 +979,6 @@ function showReport(folderId, setId) {
     
     cleanupAndSaveCurrent();
     
-    // ★修正：レポートには「通常のフルテスト」または「再テスト」の最新のものが表示されます
     const latestHistory = set.history[set.history.length - 1];
     
     currentFolderId = folderId;
@@ -1007,7 +1020,7 @@ function showReport(folderId, setId) {
 }
 
 /* =========================================
-   学習ヒートマップ表示 
+   学習ヒートマップ ＆ 連続ストリーク表示 
    ========================================= */
 function updateHeatmapFilterOptions() {
     const select = document.getElementById('heatmap-filter');
@@ -1071,7 +1084,7 @@ function renderHeatmap() {
         if (filterFolderId !== 'all' && f.id !== filterFolderId) return;
         f.sets.forEach(s => {
             s.history.forEach(h => {
-                const d = parseSafeDate(h.date); // ★修正：安全にパース
+                const d = parseSafeDate(h.date);
                 if (!isNaN(d)) {
                     const dateKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                     countsByDate[dateKey] = (countsByDate[dateKey] || 0) + h.total;
@@ -1079,6 +1092,9 @@ function renderHeatmap() {
             });
         });
     });
+
+    // ストリーク情報を自動更新
+    updateStreakDisplay(countsByDate);
 
     updateHeatmapYearOptions(countsByDate);
 
@@ -1138,6 +1154,100 @@ function renderHeatmap() {
         }
         grid.appendChild(square);
     }
+}
+
+function updateStreakDisplay(historyData) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    let streak = 0;
+    
+    for (let i = 0; i < 365; i++) { 
+        let d = new Date(today);
+        d.setDate(d.getDate() - i);
+        let dateStr = d.getFullYear() + "-" + 
+                      String(d.getMonth() + 1).padStart(2, '0') + "-" + 
+                      String(d.getDate()).padStart(2, '0');
+        
+        if (historyData && historyData[dateStr] > 0) {
+            streak++; 
+        } else if (i === 0) {
+            continue; // 今日まだ解答していなくてもストリーク維持
+        } else {
+            break; 
+        }
+    }
+    
+    const badge = document.getElementById('streak-display');
+    const countEl = document.getElementById('streak-count');
+    if (badge && countEl) {
+        if (streak > 0) {
+            countEl.textContent = streak;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+}
+
+/* =========================================
+   苦手な問題（正答率50%未満）の抽出ロジック
+   ========================================= */
+function getWeakQuestions() {
+    const stats = {}; 
+
+    appData.folders.forEach(f => {
+        f.sets.forEach(s => {
+            if (!s.history || !s.questions) return;
+            s.history.forEach(h => {
+                if (h.userAnswers && Array.isArray(h.userAnswers)) {
+                    h.userAnswers.forEach((ans, idx) => {
+                        const q = s.questions[idx];
+                        if (!q || !ans) return;
+                        const key = q["問題文"];
+                        if (!stats[key]) {
+                            stats[key] = { question: q, correct: 0, wrong: 0 };
+                        }
+                        if (ans.isCorrect) stats[key].correct++;
+                        else stats[key].wrong++;
+                    });
+                }
+            });
+        });
+    });
+
+    const weakQuestions = [];
+    Object.values(stats).forEach(item => {
+        const total = item.correct + item.wrong;
+        if (total >= 1 && (item.correct / total) < 0.5) {
+            weakQuestions.push(item.question);
+        }
+    });
+
+    return weakQuestions;
+}
+
+function initWeakRetestBtn() {
+    const weakBtn = document.getElementById('weak-retest-btn');
+    if (!weakBtn) return;
+
+    // 苦手な問題が存在する場合のみボタンを表示
+    const weakQuestions = getWeakQuestions();
+    if (weakQuestions.length > 0) {
+        weakBtn.classList.remove('hidden');
+    }
+
+    weakBtn.onclick = () => {
+        const questions = getWeakQuestions();
+        if (questions.length === 0) {
+            alert("現在、苦手判定（正答率50%未満）の問題はありません！素晴らしいです。");
+            return;
+        }
+
+        cleanupAndSaveCurrent();
+        currentFolderId = null;
+        currentSetId = null;
+        startFreshQuiz(questions);
+    };
 }
 
 /* =========================================
@@ -1224,11 +1334,13 @@ if (sidebarHeaderTitle) {
     });
 }
 
-
+/* =========================================
+   ログインフォーム送信処理
+   ========================================= */
 async function handleLogin(e) {
     e.preventDefault();
-    const username = document.getElementById('login-username').value;
-    const password = document.getElementById('login-password').value;
+    const username = document.getElementById('login-username')?.value;
+    const password = document.getElementById('login-password')?.value;
 
     try {
         const res = await fetch('/api/login', {
@@ -1241,33 +1353,7 @@ async function handleLogin(e) {
             authToken = result.token;
             localStorage.setItem('quizAuthToken', authToken);
             document.getElementById('login-modal').style.display = 'none';
-            loadAppData(); // ログイン成功後にデータをロード
-        } else {
-            alert(result.error || 'ログインに失敗しました');
-        }
-    } catch (err) {
-        alert('通信エラーが発生しました');
-    }
-}
-
-// ログインモーダル用のフォーム送信処理
-async function handleLogin(e) {
-    e.preventDefault();
-    const username = document.getElementById('login-username').value;
-    const password = document.getElementById('login-password').value;
-
-    try {
-        const res = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
-        const result = await res.json();
-        if (res.ok && result.token) {
-            authToken = result.token;
-            localStorage.setItem('quizAuthToken', authToken);
-            document.getElementById('login-modal').style.display = 'none';
-            loadAppData(); // ログイン後にクラウドからデータをロード
+            loadAppData(); 
         } else {
             alert(result.error || 'ログインに失敗しました');
         }
