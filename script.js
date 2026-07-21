@@ -101,7 +101,7 @@ initApp();
 
 // --- データ管理 (Cloudflare KV & API) ---
 async function loadAppData() {
-    // トークンがない場合はログインモーダルを表示
+    // トークンがなければログインモーダルを表示して終了
     if (!authToken) {
         const loginModal = document.getElementById('login-modal');
         if (loginModal) loginModal.style.display = 'flex';
@@ -114,7 +114,7 @@ async function loadAppData() {
         });
 
         if (res.status === 401) {
-            // 認証切れの場合はトークンを消して再ログイン
+            // 本当に認証が無効な場合のみログインを促す
             localStorage.removeItem('quizAuthToken');
             authToken = null;
             const loginModal = document.getElementById('login-modal');
@@ -136,7 +136,7 @@ async function loadAppData() {
         console.log("データ読み込みエラー", e);
     }
 
-    const isCleaned = cleanupOldHistory();
+    cleanupOldHistory();
     renderSidebar();
     renderHeatmap();
 }
