@@ -17,7 +17,7 @@ export async function onRequestPost(context) {
 
         // ランダムなトークンを生成し、KVに保存（有効期限: 24時間 = 86400秒）
         const token = crypto.randomUUID();
-        await env.QUIZ_DB.put(`session:${token}`, username, { expirationTtl: 86400 });
+        await env.QUIZ_DB.put(`session:${token}`, username, { expirationTtl: 864000 });
 
         return new Response(JSON.stringify({ success: true, token, username }), {
             headers: { "Content-Type": "application/json" }
