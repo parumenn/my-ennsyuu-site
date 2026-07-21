@@ -1,5 +1,6 @@
 /* 状態管理 */
 let appData = { folders: [] };
+let authToken = localStorage.getItem('quizAuthToken'); // ★追加: トークンを記憶する変数
 let currentFolderId = null;
 let currentSetId = null;
 let currentQuestions = [];
@@ -9,9 +10,6 @@ let timerInterval = null;
 let elapsedTime = 0;
 let targetFolderIdForImport = null;
 let currentFontScale = 1;
-
-/*WEBホスト対応*/
-let authToken = localStorage.getItem('quizAuthToken');
 
 let syncFileHandle = null; 
 
@@ -101,10 +99,12 @@ async function initApp() {
 
 initApp();
 
-/* --- データ管理 (LocalStorage & File System) --- */
+// --- データ管理 (Cloudflare KV & API) ---
 async function loadAppData() {
+    // トークンがない場合はログインモーダルを表示
     if (!authToken) {
-        document.getElementById('login-modal').style.display = 'flex';
+        const loginModal = document.getElementById('login-modal');
+        if (loginModal) loginModal.style.display = 'flex';
         return;
     }
 
@@ -114,15 +114,16 @@ async function loadAppData() {
         });
 
         if (res.status === 401) {
-            // トークンが切れている場合は再ログイン
+            // 認証切れの場合はトークンを消して再ログイン
             localStorage.removeItem('quizAuthToken');
             authToken = null;
-            document.getElementById('login-modal').style.display = 'flex';
+            const loginModal = document.getElementById('login-modal');
+            if (loginModal) loginModal.style.display = 'flex';
             return;
         }
 
         const text = await res.text();
-        if (text) {
+        if (text && text.trim() !== '') {
             appData = JSON.parse(text);
             appData.folders.forEach(f => {
                 f.sets.forEach(s => {
@@ -135,7 +136,7 @@ async function loadAppData() {
         console.log("データ読み込みエラー", e);
     }
 
-    cleanupOldHistory();
+    const isCleaned = cleanupOldHistory();
     renderSidebar();
     renderHeatmap();
 }
@@ -179,8 +180,8 @@ async function saveAppData() {
             console.error("クラウド保存エラー", error);
         }
     }
-
-    // ローカルファイル同期の処理（もし以前の設定が残っていればそのまま維持）
+    
+    // 既存のローカルファイル同期（File System API）の処理があれば維持
     if (syncFileHandle) {
         try {
             const hasPermission = await verifyPermission(syncFileHandle, true);
@@ -190,11 +191,10 @@ async function saveAppData() {
                 await writable.close();
             }
         } catch (error) {
-            console.error("ローカルファイル保存エラー", error);
+            console.error("保存エラー", error);
         }
     }
 }
-
 // フォルダ設定・同期再開ボタンの処理
 const syncBtn = document.getElementById('sync-file-btn');
 if (syncBtn) {
@@ -1220,6 +1220,32 @@ async function handleLogin(e) {
             localStorage.setItem('quizAuthToken', authToken);
             document.getElementById('login-modal').style.display = 'none';
             loadAppData(); // ログイン成功後にデータをロード
+        } else {
+            alert(result.error || 'ログインに失敗しました');
+        }
+    } catch (err) {
+        alert('通信エラーが発生しました');
+    }
+}
+
+// ログインモーダル用のフォーム送信処理
+async function handleLogin(e) {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+
+    try {
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const result = await res.json();
+        if (res.ok && result.token) {
+            authToken = result.token;
+            localStorage.setItem('quizAuthToken', authToken);
+            document.getElementById('login-modal').style.display = 'none';
+            loadAppData(); // ログイン後にクラウドからデータをロード
         } else {
             alert(result.error || 'ログインに失敗しました');
         }
