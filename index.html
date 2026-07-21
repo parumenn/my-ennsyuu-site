@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ME</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="image/icon.ico" type="image/x-icon">
+</head>
+<body>
+    <div class="app-container">
+        <!-- スマホ用メニューオーバーレイ -->
+        <div id="mobile-overlay" class="mobile-overlay hidden"></div>
+
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h2>📁 演習メニュー</h2>
+                <button id="add-folder-btn" class="action-btn add-btn">+ 新規フォルダ</button>
+            </div>
+            
+            <nav id="category-nav" class="category-nav"></nav>
+
+            <!-- 新機能：設定・連携エリア -->
+            <div class="sidebar-footer">
+                <div class="font-size-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 0.85rem; color: #A0A0A0;">🔍 文字サイズ</span>
+                    <div>
+                        <button id="font-dec-btn" class="action-btn outline-btn" style="padding: 4px 10px; color:#fff;">A-</button>
+                        <button id="font-inc-btn" class="action-btn outline-btn" style="padding: 4px 10px; color:#fff;">A+</button>
+                    </div>
+                </div>
+                <label class="toggle-label">
+                    <input type="checkbox" id="shuffle-mode-chk">
+                    <span>🔀 出題順シャッフル</span>
+                </label>
+                <button id="dark-mode-btn" class="action-btn outline-btn sidebar-btn">🌙 ダークモード</button>
+                <button id="sync-file-btn" class="action-btn primary-btn sidebar-btn" title="一度ファイルを選ぶと、以降は自動で上書き保存されます">💾 ローカルファイルと同期</button>
+                <span id="sync-status" class="sync-status">未同期 (ブラウザに保存)</span>
+                <button id="download-backup-btn" class="action-btn outline-btn sidebar-btn" style="margin-top: 10px;">📥 バックアップをダウンロード</button>
+<button id="restore-backup-btn" class="action-btn outline-btn sidebar-btn" style="margin-top: 5px; border-color: #E0E0E0;">📤 バックアップから復元</button>
+                <input type="file" id="restore-file-input" accept=".json" style="display: none;">
+            </div>
+        </aside>
+        <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" title="サイドバーを開閉">◀</button>
+
+        <input type="file" id="json-file-input" accept=".json" style="display: none;">
+
+        <main class="main-content">
+            <!-- スマホ用ハンバーガーボタン -->
+            <button id="mobile-menu-btn" class="mobile-menu-btn">☰ メニュー</button>
+
+            <div id="welcome-screen" class="screen active">
+                <div class="welcome-box">
+                    <h1>問題演習へようこそ</h1>
+                    <p>左のメニューからフォルダを作成し、JSON問題をロードしてください。<br>
+                    ※左下の「ローカルファイルと同期」から既存のデータを読み込むことも可能です。</p>
+                </div>
+                <div class="heatmap-section">
+                    <div class="heatmap-header">
+                        <h2>📊 学習ヒートマップ</h2>
+                        <!-- ▼ 年の切り替えとフォルダ絞り込みを並べる ▼ -->
+                        <div class="heatmap-controls" style="display: flex; gap: 10px;">
+                            <select id="heatmap-year" class="heatmap-select"></select>
+                            <select id="heatmap-filter" class="heatmap-select">
+                                <option value="all">全体ビュー</option>
+                            </select>
+                        </div>
+                    </div>
+                                        <div class="heatmap-scroll">
+                        <div class="heatmap-container">
+                            <!-- Y軸 (曜日ラベル) -->
+                            <div class="heatmap-y-axis">
+                                <span style="grid-row: 2;">月</span>
+                                <span style="grid-row: 4;">水</span>
+                                <span style="grid-row: 6;">金</span>
+                            </div>
+                            <!-- メイン領域 (X軸 + グリッド) -->
+                            <div class="heatmap-main">
+                                <!-- X軸 (月ラベル) -->
+                                <div id="heatmap-x-axis" class="heatmap-x-axis"></div>
+                                <!-- グリッド本体 -->
+                                <div id="heatmap-grid" class="heatmap-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="heatmap-legend">
+                        <span>Less</span>
+                        <div class="legend-box level-0"></div>
+                        <div class="legend-box level-1"></div>
+                        <div class="legend-box level-2"></div>
+                        <div class="legend-box level-3"></div>
+                        <div class="legend-box level-4"></div>
+                        <span>More</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="quiz-screen" class="screen">
+                <header class="quiz-header">
+                    <h2 id="quiz-title">問題セット名</h2>
+                    <div class="progress-indicator">
+                        <span id="timer-display">⏱ 00:00</span> | 
+                        問題 <span id="current-q-num">1</span> / <span id="total-q-num">5</span>
+                    </div>
+                </header>
+
+                <div class="question-card">
+                    <p id="question-text">ここに問題文が表示されます。</p>
+                </div>
+
+                <div id="choices-grid" class="choices-grid"></div>
+
+                <div id="feedback-area" class="feedback-area hidden">
+                    <div class="feedback-header">
+                        <span id="judgement-badge" class="badge">正解</span>
+                    </div>
+                    <div class="explanation-content">
+                        <h3>解説</h3>
+                        <p id="explanation-text"></p>
+                    </div>
+                    <button id="next-btn" class="btn primary-btn">次の問題へ ➔</button>
+                </div>
+            </div>
+
+            <div id="result-screen" class="screen">
+                <div class="result-box">
+                    <div class="result-header">
+                        <h2 id="result-set-title">セット名</h2>
+                        <span class="attempt-badge" id="attempt-count">1回目の試み</span>
+                    </div>
+                    <div class="result-meta">
+                        <span id="result-total-info">65問 | 2時間 10分</span>
+                        <span id="result-date">2026年7月4日 17:36</span>
+                    </div>
+                    
+                    <div class="result-stats-container">
+                        <div class="chart-wrapper">
+                            <div class="chart-circle" id="result-chart">
+                                <div class="chart-inner"></div>
+                            </div>
+                        </div>
+                        <div class="score-details">
+                            <div class="score-percentage">
+                                <span id="score-percent-val">87</span><span class="percent-symbol">%</span>
+                                <span class="score-fraction" id="score-fraction-val">正解 (57/65)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-actions">
+                        <button id="retest-btn" class="btn outline-btn hidden">⚠️ 間違えた問題を再テスト</button>
+                        <button id="review-btn" class="btn primary-btn">問題を見直す</button>
+                        <button id="home-btn" class="btn secondary-btn">トップへ戻る</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="review-screen" class="screen">
+                <header class="quiz-header">
+                    <h2>問題の振り返り</h2>
+                    <div class="review-filters">
+                        <button class="filter-btn active" data-filter="all">全て</button>
+                        <button class="filter-btn" data-filter="incorrect">不正解のみ</button>
+                        <button class="filter-btn" data-filter="correct">正解のみ</button>
+                    </div>
+                </header>
+                <div id="review-list" class="review-list"></div>
+                <button id="back-to-result-btn" class="btn secondary-btn">結果に戻る</button>
+            </div>
+        </main>
+
+        <div id="resume-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h3>前回の続きから再開しますか？</h3>
+                <p>保存された進捗があります。</p>
+                <div class="modal-actions">
+                    <button id="resume-btn" class="btn primary-btn">続きから再開</button>
+                    <button id="restart-btn" class="btn secondary-btn">最初からやり直す</button>
+                    <button id="cancel-modal-btn" class="btn outline-btn">キャンセル</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+<!-- ログインモーダル -->
+    <div id="login-modal" class="modal-overlay hidden" style="display: flex;">
+        <div class="modal-content" style="width: 320px;">
+            <h3>🔐 ログイン</h3>
+            <p style="margin-bottom: 15px;">利用するにはログインしてください</p>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <input type="text" id="login-username" placeholder="ユーザー名" required style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-main);">
+                <input type="password" id="login-password" placeholder="パスワード" required style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-main);">
+                <button type="submit" class="btn primary-btn" style="width: 100%;">ログイン</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
