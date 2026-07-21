@@ -368,7 +368,38 @@ function renderSidebar() {
             
             const btnGroup = document.createElement('div');
             btnGroup.className = 'set-btn-group';
-
+const weakBtn = document.createElement('button');
+            weakBtn.className = 'icon-btn'; 
+            weakBtn.textContent = '⚠️';
+            weakBtn.title = 'このセットの苦手問題を復習';
+            weakBtn.onclick = (e) => {
+                e.stopPropagation();
+                const weakQs = getWeakQuestions(folder.id, set.id);
+                if (weakQs.length === 0) {
+                    alert("このセットには、正答率50%未満の苦手な問題はありません！");
+                    return;
+                }
+                closeMobileMenu();
+                cleanupAndSaveCurrent();
+                
+                // どのセットでテストしているかを記録
+                currentFolderId = folder.id;
+                currentSetId = set.id;
+                
+                const chk = document.getElementById('shuffle-mode-chk');
+                const isShuffle = chk ? chk.checked : false;
+                currentQuestions = isShuffle ? shuffleArray(weakQs) : [...weakQs];
+                
+                currentIndex = 0;
+                userAnswers = [];
+                elapsedTime = 0;
+                
+                document.getElementById('quiz-title').textContent = `${set.name} 【⚠️苦手復習】` + (isShuffle ? " (🔀シャッフル)" : "");
+                startTimer();
+                switchScreen('quiz-screen');
+                renderQuestion();
+            };
+            
             const reportBtn = document.createElement('button');
             reportBtn.className = 'icon-btn'; 
             reportBtn.textContent = '📊';
@@ -389,7 +420,7 @@ function renderSidebar() {
                 }
             };
 
-            btnGroup.append(reportBtn, delSetBtn);
+            btnGroup.append(weakBtn, reportBtn, delSetBtn);
             setWrapper.append(setBtn, btnGroup);
             setContainer.appendChild(setWrapper);
         });
