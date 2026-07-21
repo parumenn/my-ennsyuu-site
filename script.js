@@ -1167,6 +1167,7 @@ if (restoreBtn && restoreInput) {
                     localStorage.setItem('quizAppData_v2', JSON.stringify(appData));
                     renderSidebar();
                     renderHeatmap();
+                    saveAppData();
                     
                     if (syncFileHandle) saveAppData();
                     alert('✅ バックアップからの復元が完了しました！');
