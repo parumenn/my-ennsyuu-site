@@ -314,3 +314,58 @@ body.dark-mode .level-4 { background-color: #39D353; }
     .heatmap-section { padding: 15px; border-radius: 10px; }
     .heatmap-scroll { -webkit-overflow-scrolling: touch; padding-bottom: 10px; }
 }
+
+/* ==========================================
+   追加機能：プログレスバー、ストリーク、消去法
+   ========================================== */
+
+/* プログレスバー */
+.progress-bar-bg {
+    width: 100%;
+    height: 6px;
+    background-color: var(--border-color);
+    border-radius: 3px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.progress-bar-fill {
+    height: 100%;
+    background-color: var(--primary-color);
+    width: 0%;
+    transition: width 0.4s ease;
+}
+
+/* 連続学習ストリークバッジ */
+.streak-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+    color: #d63031;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 20px;
+    margin: 10px 0 15px 0;
+    font-size: 1.05rem;
+    box-shadow: 0 4px 15px rgba(214, 48, 49, 0.2);
+}
+body.dark-mode .streak-badge {
+    background: linear-gradient(135deg, #4a1c1c 0%, #2d1414 100%);
+    color: #ff7675;
+}
+
+/* 苦手再テストボタン */
+.weak-btn {
+    border-color: #ff7675;
+    color: #ff7675;
+    margin-top: 10px;
+}
+body.dark-mode .weak-btn {
+    border-color: #ff7675;
+    color: #ff7675;
+}
+
+/* スマホ長押し時の文字選択・メニュー表示をブロック（超重要） */
+.choice-btn {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
