@@ -52,7 +52,7 @@ body { background-color: var(--bg-color); color: var(--text-main); display: flex
 
 /* --- メインコンテンツ --- */
 .main-content { flex-grow: 1; padding: 20px 40px; overflow-y: auto; position: relative; }
-.mobile-menu-btn { display: none; background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 6px; cursor: pointer; margin-bottom: 15px; [...]
+.mobile-menu-btn { display: none; background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 6px; cursor: pointer; margin-bottom: 15px; }
 .screen { display: none; animation: fadeIn 0.3s ease; max-width: 800px; margin: 0 auto; }
 .screen.active { display: block; }
 #question-text, #explanation-text { white-space: pre-wrap; }
@@ -62,7 +62,7 @@ body { background-color: var(--bg-color); color: var(--text-main); display: flex
 .progress-indicator { color: var(--text-muted); font-weight: bold; }
 .question-card { background: var(--card-bg); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); font-size: 1.1rem; line-height: 1.6; margin-bottom: 25px; }
 .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-.choice-btn { background: var(--card-bg); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; font-size: 1rem; color: var(--text-main); cursor: pointer; text-align: left; transit[...]
+.choice-btn { background: var(--card-bg); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; font-size: 1rem; color: var(--text-main); cursor: pointer; text-align: left; transition: 0.2s; }
 .choice-btn:hover:not(:disabled) { border-color: var(--primary-color); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(108, 92, 231, 0.15); }
 .choice-btn.correct { background-color: rgba(0, 184, 148, 0.1); border-color: #00B894; color: #00B894; font-weight: bold; }
 .choice-btn.incorrect { background-color: rgba(214, 48, 49, 0.1); border-color: #D63031; color: #D63031; }
@@ -167,21 +167,25 @@ body.dark-mode .secondary-btn:hover { background-color: #555; }
     background-color: rgba(108, 92, 231, 0.1);
     box-shadow: 0 4px 10px rgba(108, 92, 231, 0.15);
 }
+
 /* --- 追加：フォルダ展開/縮小表示用のスタイル --- */
 .folder-header {
     cursor: pointer;
     user-select: none;
     transition: background-color 0.2s;
 }
+
 .folder-header:hover {
-    background-color: rgba(255,255,255,0.1); /* マウスを乗せたら少し明るくする */
+    background-color: rgba(255,255,255,0.1);
 }
+
 .folder-toggle-icon {
     display: inline-block;
     width: 18px;
     font-size: 0.8rem;
     transition: transform 0.2s ease;
 }
+
 /* 開いているときはアイコンを90度回転（▼にする） */
 .folder.open .folder-toggle-icon {
     transform: rotate(90deg);
@@ -189,8 +193,9 @@ body.dark-mode .secondary-btn:hover { background-color: #555; }
 
 /* --- 追加機能：フォントサイズ可変対応 --- */
 :root {
-    --font-scale: 1; /* JSで動的に変更される変数 */
+    --font-scale: 1;
 }
+
 .question-card { font-size: calc(1.1rem * var(--font-scale)); }
 .choice-btn { font-size: calc(1rem * var(--font-scale)); }
 .review-q, .review-exp { font-size: calc(1rem * var(--font-scale)); }
@@ -206,50 +211,91 @@ body.dark-mode .secondary-btn:hover { background-color: #555; }
 
 /* --- 追加機能：学習ヒートマップ --- */
 .heatmap-section {
-    background: var(--card-bg); padding: 25px; border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px;
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-top: 20px;
 }
+
 .heatmap-header {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
+
 .heatmap-header h2 { font-size: 1.2rem; }
+
 .heatmap-select {
-    padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color);
-    background: var(--bg-color); color: var(--text-main); font-size: 0.9rem;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-color);
+    color: var(--text-main);
+    font-size: 0.9rem;
 }
+
 .heatmap-scroll {
-    overflow-x: auto; padding-bottom: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
 }
+
 .heatmap-grid {
     display: grid;
-    grid-template-rows: repeat(7, 12px);
+    grid-template-rows: repeat(7, 10px);
     grid-auto-flow: column;
-    gap: 4px; 
+    gap: 3px;
     width: max-content;
 }
+
 .day-square {
-    width: 12px; height: 12px; border-radius: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
     background-color: var(--border-color);
-    position: relative; cursor: pointer;
+    position: relative;
+    cursor: pointer;
 }
+
 .day-square:hover::after {
     content: attr(data-title);
-    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
-    background: #333; color: #fff; padding: 4px 8px; border-radius: 4px;
-    font-size: 0.75rem; white-space: nowrap; z-index: 10; margin-bottom: 5px;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 10;
+    margin-bottom: 5px;
 }
+
 .heatmap-legend {
-    display: flex; align-items: center; justify-content: flex-end;
-    gap: 5px; font-size: 0.8rem; color: var(--text-muted); margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 10px;
 }
-.legend-box { width: 12px; height: 12px; border-radius: 2px; }
+
+.legend-box {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
 
 /* ヒートマップの色合い（GitHub風の緑） */
-.level-0 { background-color: var(--border-color); } /* 0問 */
-.level-1 { background-color: #9BE9A8; } /* 1〜5問 */
-.level-2 { background-color: #40C463; } /* 6〜15問 */
-.level-3 { background-color: #30A14E; } /* 16〜30問 */
-.level-4 { background-color: #216E39; } /* 31問以上 */
+.level-0 { background-color: var(--border-color); }
+.level-1 { background-color: #9BE9A8; }
+.level-2 { background-color: #40C463; }
+.level-3 { background-color: #30A14E; }
+.level-4 { background-color: #216E39; }
 
 /* ダークモード用ヒートマップ調整 */
 body.dark-mode .level-0 { background-color: #2D333B; }
@@ -263,23 +309,27 @@ body.dark-mode .level-4 { background-color: #39D353; }
     gap: 8px;
     padding-top: 5px;
 }
+
 .heatmap-y-axis {
     display: grid;
-    grid-template-rows: repeat(7, 12px);
-    gap: 4px;
-    font-size: 0.7rem;
+    grid-template-rows: repeat(7, 10px);
+    gap: 3px;
+    font-size: 0.65rem;
     color: var(--text-muted);
     text-align: right;
-    margin-top: 20px; /* 月ラベルの高さ分だけ下げる */
+    margin-top: 20px;
 }
+
 .heatmap-y-axis span {
-    line-height: 12px;
+    line-height: 10px;
 }
+
 .heatmap-main {
     display: flex;
     flex-direction: column;
     position: relative;
 }
+
 .heatmap-x-axis {
     display: flex;
     font-size: 0.75rem;
@@ -288,48 +338,32 @@ body.dark-mode .level-4 { background-color: #39D353; }
     position: relative;
     margin-bottom: 4px;
 }
+
 .month-label {
     position: absolute;
     bottom: 0;
     white-space: nowrap;
 }
+
 #welcome-screen {
     max-width: 1000px;
 }
 
-/* マス目と隙間を少しコンパクトにする (12px -> 10px, 隙間 4px -> 3px) */
-.heatmap-grid {
-    grid-template-rows: repeat(7, 10px);
-    gap: 3px; 
-}
-.day-square {
-    width: 10px; height: 10px; border-radius: 2px;
-}
-.heatmap-y-axis {
-    grid-template-rows: repeat(7, 10px);
-    gap: 3px;
-    margin-top: 20px; 
-}
-.heatmap-y-axis span {
-    line-height: 10px;
-    font-size: 0.65rem;
-}
-.legend-box { 
-    width: 10px; height: 10px; 
-}
 /* --- 追加機能：サイドバー開閉（トグル） --- */
 .sidebar {
     transition: width 0.3s ease, padding 0.3s ease;
 }
+
 .sidebar.collapsed {
     width: 0;
     padding: 0;
     overflow: hidden;
 }
+
 .sidebar-toggle-btn {
     position: absolute;
     top: 50%;
-    left: 280px; /* サイドバーの幅 */
+    left: 280px;
     transform: translateY(-50%);
     background-color: var(--primary-color);
     color: white;
@@ -346,14 +380,16 @@ body.dark-mode .level-4 { background-color: #39D353; }
     font-size: 0.8rem;
     box-shadow: 3px 0 6px rgba(0,0,0,0.15);
 }
+
 .sidebar-toggle-btn:hover {
     background-color: var(--primary-hover);
 }
+
 .sidebar.collapsed ~ .sidebar-toggle-btn {
     left: 0;
 }
 
-/* スマホ表示ではトグルボタンは隠す（ハンバーガーメニューがあるため） */
+/* スマホ表示ではトグルボタンは隠す */
 @media (max-width: 768px) {
     .sidebar-toggle-btn { display: none; }
 }
@@ -363,11 +399,13 @@ body.dark-mode .level-4 { background-color: #39D353; }
     display: flex;
     gap: 4px;
 }
+
 /* --- バグ修正：ライトモード時のサイドバー内ボタンの視認性改善 --- */
 .sidebar .outline-btn {
-    color: #DFE6E9 !important; /* 常に白系の文字色にする */
+    color: #DFE6E9 !important;
     border-color: rgba(255, 255, 255, 0.3) !important;
 }
+
 .sidebar .outline-btn:hover {
     background-color: rgba(255, 255, 255, 0.1) !important;
 }
