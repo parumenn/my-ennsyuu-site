@@ -1180,10 +1180,11 @@ function renderHeatmap() {
             else if (count > 30) level = 4;
 
             square.className = `day-square level-${level}`;
-            const weekStr = ["日", "月", "火", "水", "木", "金", "土"][d.getDay()];
-            square.dataset.title = `${d.getMonth()+1}月${d.getDate()}日(${weekStr}): ${count}問解答`;
-            square.title = titleText; 
-            square.dataset.title = titleText;
+const weekStr = ["日", "月", "火", "水", "木", "金", "土"][d.getDay()];
+const titleText = `${d.getMonth()+1}月${d.getDate()}日(${weekStr}): ${count}問解答`;
+
+square.title = titleText; 
+square.dataset.title = titleText;
         }
         grid.appendChild(square);
     }
